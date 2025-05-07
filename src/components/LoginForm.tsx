@@ -1,10 +1,13 @@
-// src/components/LoginForm.tsx (标准单步登录表单)
+// src/components/LoginForm.tsx (修复 Spinner 错误 - 浅色主题 for Vite)
+
 import React, { useState, type FormEvent } from 'react';
 // import { useNavigate } from 'react-router-dom'; // **ROUTER_REPLACE**: 如果需要内部路由
 // import { Link } from 'react-router-dom'; // **ROUTER_REPLACE**
 
-// --- 辅助 SVG 组件 ---
-const LoadingSpinner = ({ color = "#ffffff", size = 20 }: { color?: string; size?: number }) => {
+// --- 辅助 SVG 组件定义 ---
+
+// 加载图标 - 用于浅灰色按钮 (深色图标)
+const LoadingSpinnerGray = ({ color = "#4B5563", size = 20 }: { color?: string; size?: number }) => { // Default color gray-600
     return (
         <svg className="animate-spin" style={{ color: color, height: size, width: size }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -12,59 +15,41 @@ const LoadingSpinner = ({ color = "#ffffff", size = 20 }: { color?: string; size
         </svg>
     );
 };
+// 移除了未使用的 LoadingSpinnerWhite 定义
 
-const AppLogo = () => { // 示例 Logo - 请替换为你自己的
+// 占位符 Logo - 使用柔和灰色
+const AppLogo = () => {
     return (
-        <div className="mb-6 h-12 w-12 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-2xl">
-            L {/* 占位符 Logo */}
-        </div>
+         <div className="mb-6 h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-2xl">
+            L {/* 占位符 */}
+         </div>
     );
 };
 
-
-// --- LoginForm 组件 ---
+// --- LoginForm 组件逻辑 ---
 export default function LoginForm() {
-    // --- 状态定义 ---
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    // const navigate = useNavigate(); // **ROUTER_REPLACE**
 
-    // --- 表单提交处理 ---
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        setError(null); // 清除之前的错误
-
-        // 前端基本校验 (可选)
-        if (!email || !password) {
-            setError("邮箱和密码不能为空。");
-            return;
-        }
-        if (password.length < 8) {
-            setError("密码长度不能少于8位。");
-            return;
-        }
-
+        setError(null);
+        if (!email || !/\S+@\S+\.\S+/.test(email)) { setError('请输入有效的邮箱地址'); return; }
+        if (!password) { setError('请输入密码'); return; }
+        if (password.length < 8) { setError('密码长度不能少于8位'); return; }
         setIsLoading(true);
-        console.log("尝试登录:", { email }); // 不打印密码
-
-        // **API_REPLACE**: 替换为实际的后端 API 调用
-        // 成功后获取 token 并使用 window.location.href 跳转到 UmiJS 应用
+        console.log("模拟登录 (Vite):", { email });
         try {
-            // 模拟 API 调用
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            const mockLoginResult = { ok: true, error: null, token: "fake-jwt-token" }; // 模拟成功
-            // const mockLoginResult = { ok: false, error: '邮箱或密码不正确' }; // 模拟失败
-
-            if (mockLoginResult.ok) {
-                console.log("模拟登录成功, Token:", mockLoginResult.token);
-                alert("模拟登录成功！准备跳转..."); // 占位提示
-                // **REDIRECT_REPLACE**: 跳转到 Umi 应用并携带 token
-                // window.location.href = `YOUR_UMIJS_APP_URL/dashboard#token=${mockLoginResult.token}`;
+            await new Promise(resolve => setTimeout(resolve, 1000)); // 模拟 API 延迟
+            const mockSignInResult = { ok: true, error: null, token: "fake-token" }; // 模拟成功
+            if (mockSignInResult.ok) {
+                alert('模拟登录成功！准备跳转...'); // 占位提示
                 console.log('将跳转到 Umi 应用...');
+                // **VITE_REPLACE**: window.location.href = `YOUR_UMIJS_APP_URL/dashboard#token=${mockSignInResult.token}`;
             } else {
-                setError(mockLoginResult.error || '登录失败，请重试。');
+                setError(mockSignInResult.error || '邮箱或密码错误，请重试。');
             }
         } catch (err: any) {
             console.error('登录时发生意外错误:', err);
@@ -74,102 +59,69 @@ export default function LoginForm() {
         }
     };
 
-    // 输入框内容变化时清除错误
     const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => { setEmail(e.target.value); if (error) setError(null); };
     const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => { setPassword(e.target.value); if (error) setError(null); };
 
-    // --- JSX 结构 ---
+    // --- JSX (纯白卡片 - 强阴影 - 更柔和边缘灰色元素) ---
     return (
-        // 卡片容器: 居中、内边距、圆角、背景色、阴影、边框
-        <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg border border-gray-200">
+        // 卡片容器: 宽度 max-w-xl, 背景 bg-white, 圆角 rounded-2xl, 阴影 shadow-2xl
+        <div className="w-full max-w-xl rounded-2xl bg-white p-10 shadow-2xl">
             {/* Logo 和标题 */}
-            <div className="mb-6 flex flex-col items-center text-center">
-                <AppLogo />
-                <h1 className="text-2xl font-bold text-gray-900">
+            <div className="mb-10 flex flex-col items-center text-center">
+                <AppLogo /> {/* 使用更柔和灰色 Logo */}
+                <h1 className="mt-5 text-3xl font-medium text-gray-900">
                     登录您的账户
                 </h1>
             </div>
 
-            {/* 登录表单 */}
-            <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-                {/* 邮箱输入框 */}
+            {/* 单个表单 */}
+            <form onSubmit={handleSubmit} className="space-y-8" noValidate>
+                {/* Email Input */}
                 <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                        邮箱地址
-                    </label>
                     <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        autoComplete="email"
-                        required
-                        value={email}
-                        onChange={handleEmailChange}
-                        // 标准输入框样式，错误时边框变红
-                        className={`block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm placeholder-gray-400 transition focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm ${error?.includes('邮箱') ? 'border-red-500' : ''}`}
-                        placeholder="you@example.com"
-                        disabled={isLoading}
+                        id="email" name="email" type="email" required value={email} onChange={handleEmailChange}
+                        className={`block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder-gray-500 shadow-sm transition-colors duration-150 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 ${error?.includes('邮箱') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'focus:border-blue-500 focus:ring-blue-500'}`}
+                        placeholder="电子邮箱或电话号码" disabled={isLoading} aria-invalid={!!error?.includes('邮箱')} aria-describedby="form-error-msg"
                     />
                 </div>
 
-                {/* 密码输入框 */}
+                {/* Password Input */}
                 <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                        密码
-                    </label>
                     <input
-                        id="password"
-                        name="password"
-                        type="password"
-                        autoComplete="current-password"
-                        required
-                        value={password}
-                        onChange={handlePasswordChange}
-                        // 标准输入框样式，错误时边框变红
-                        className={`block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm placeholder-gray-400 transition focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm ${error?.includes('密码') ? 'border-red-500' : ''}`}
-                        placeholder="••••••••"
-                        disabled={isLoading}
+                        id="password" name="password" type="password" required value={password} onChange={handlePasswordChange}
+                        className={`block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder-gray-500 shadow-sm transition-colors duration-150 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 ${error?.includes('密码') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'focus:border-blue-500 focus:ring-blue-500'}`}
+                        placeholder="密码" disabled={isLoading} aria-invalid={!!error?.includes('密码')} aria-describedby="form-error-msg"
                     />
                 </div>
 
-                {/* 忘记密码链接 */}
-                <div className="text-right text-sm">
-                    {/* **ROUTER_REPLACE**: 如果需要内部路由，使用 react-router-dom 的 Link */}
-                    <a href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
-                        忘记密码?
-                    </a>
-                </div>
+                 {/* 忘记密码链接 */}
+                 <div className="text-right text-sm">
+                    <a href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:underline">忘记了密码?</a>
+                 </div>
 
-                {/* 错误信息显示 */}
-                {/* 使用 min-h 避免消息消失时布局跳动 */}
-                <div className="min-h-[20px] text-center text-sm">
-                    {error && (
-                        <p className="text-red-600">
-                            {error}
-                        </p>
-                    )}
-                </div>
+                 {/* 统一的错误信息显示 */}
+                 <div className="min-h-[20px] text-center text-sm">
+                    {error && ( <p id="form-error-msg" className="text-red-600">{error}</p> )}
+                 </div>
 
-
-                {/* 登录按钮 */}
-                <button
-                    type="submit"
-                    // 标准按钮样式
-                    className={`flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-75 ${isLoading ? 'cursor-not-allowed' : ''}`}
-                    disabled={isLoading}
-                >
-                    {isLoading ? <LoadingSpinner /> : '登录'}
+                {/* Final Login Button - 使用浅灰色和柔和边缘 */}
+                <button type="submit"
+                        // 移除边框，使用更浅的灰色背景，保留 shadow-sm，调整 hover 和 focus
+                        className={`relative flex w-full justify-center rounded-lg border-none bg-gray-100 px-6 py-2.5 text-sm font-medium text-gray-600 shadow-sm transition-colors hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 disabled:opacity-70 ${isLoading ? 'cursor-not-allowed' : ''}`} // 保持柔和灰色按钮样式
+                        disabled={isLoading}>
+                    {/* 使用灰色加载图标 */}
+                    {isLoading ? <LoadingSpinnerGray /> : '登录'} {/* 确认使用 LoadingSpinnerGray */}
                 </button>
 
-                {/* 创建账户链接 */}
-                <p className="text-center text-sm text-gray-600">
-                    还没有账户?{' '}
-                    {/* **ROUTER_REPLACE**: 如果需要内部路由，使用 react-router-dom 的 Link */}
-                    <a href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
-                        创建账户
-                    </a>
-                </p>
+                 {/* 创建账户链接 */}
+                 <div className='text-center text-sm pt-2'>
+                     <p className="text-gray-600">
+                         还没有账户?{' '}
+                         <a href="/register" className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:underline">创建账户</a>
+                     </p>
+                 </div>
             </form>
         </div>
     );
 }
+

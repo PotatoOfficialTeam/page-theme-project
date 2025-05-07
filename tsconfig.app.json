@@ -1,6 +1,8 @@
 {
+  // 通常会继承自基础的 tsconfig.json
+  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    // --- 基础 React/Vite 选项 (你的可能不同) ---
     "target": "ES2020",
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
@@ -10,18 +12,27 @@
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "moduleDetection": "force",
-    "noEmit": true,
-    "jsx": "react-jsx",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true, // Vite 通常处理编译，所以这里是 noEmit
+    "jsx": "react-jsx", // 重要的 JSX 配置
 
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+
+    // --- 路径别名配置 (关键部分) ---
+    "baseUrl": ".", // 设置基础目录为项目根目录
+    "paths": {
+      "@/*": ["./src/*"] // 定义 @/* 指向 ./src/* 目录
+    }
+    // --- 路径别名配置结束 ---
   },
-  "include": ["src"]
+  // 指定哪些文件应该被这个配置包含
+  "include": ["src"],
+  // 引用基础 tsconfig.json (如果 extends 没有指定)
+  // "references": [{ "path": "./tsconfig.node.json" }] // 这个引用通常在根 tsconfig.json
 }
+
