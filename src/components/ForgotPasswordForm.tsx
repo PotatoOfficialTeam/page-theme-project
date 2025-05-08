@@ -1,8 +1,8 @@
-// src/components/ForgotPasswordForm.tsx (忘记密码表单 - 浅色主题 - 宽卡片 - 强阴影)
+// src/components/ForgotPasswordForm.tsx (忘记密码表单 - 浅色主题 - 宽卡片 - 强阴影 - 使用 Link)
 'use client'; // 虽然 Vite 不用，但保留无害
 
 import React, { useState, type FormEvent } from 'react';
-// import { Link } from 'react-router-dom'; // **ROUTER_REPLACE**: 如果需要内部路由
+import { Link } from 'react-router-dom'; // 1. 导入 Link 组件
 
 // --- 辅助 SVG 组件定义 ---
 const LoadingSpinnerGray = ({ color = "#4B5563", size = 20 }: { color?: string; size?: number }) => { // 用于浅灰色按钮
@@ -116,10 +116,10 @@ export default function ForgotPasswordForm() {
                  {/* Link back to Login */}
                  <p className="text-center text-sm text-gray-600">
                      记起密码了？{' '}
-                     {/* **ROUTER_REPLACE**: 如果需要内部路由，使用 react-router-dom 的 Link */}
-                     <a href="/login" className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:underline">
+                     {/* 2. 将 a 标签替换为 Link 组件 */}
+                     <Link to="/" className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:underline">
                          返回登录
-                     </a>
+                     </Link>
                  </p>
             </form>
         </div>

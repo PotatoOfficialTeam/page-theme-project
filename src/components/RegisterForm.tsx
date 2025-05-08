@@ -1,8 +1,8 @@
-// src/components/RegisterForm.tsx (注册表单 - 浅色主题 - 宽卡片 - 强阴影)
-'use client'; // 虽然 Vite 不用，但保留无害
+// src/components/RegisterForm.tsx (注册表单 - 浅色主题 - 宽卡片 - 强阴影 - 使用 Link)
+'use client';
 
-import { useState, type FormEvent } from 'react'; // 移除了未使用的 React 导入
-import { Link, useNavigate } from 'react-router-dom'; // 导入 react-router-dom 的 Link 和 useNavigate
+import { useState, type FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom'; // 导入 Link 和 useNavigate
 
 // --- 辅助 SVG 组件定义 ---
 const LoadingSpinnerGray = ({ color = "#4B5563", size = 20 }: { color?: string; size?: number }) => { // 用于浅灰色按钮
@@ -171,3 +171,4 @@ export default function RegisterForm() {
         </div>
     );
 }
+
