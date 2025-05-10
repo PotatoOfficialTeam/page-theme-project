@@ -44,6 +44,8 @@ const NotFoundPage: React.FC = () => (
 
 // 5. 导入全局 CSS
 import './index.css';
+import RegisterForm from './components/RegisterForm';
+import ForgotPasswordForm from './components/ForgotPasswordForm';
 
 // --- 应用主路由和状态管理组件 ---
 const AppRouter: React.FC = () => {
@@ -90,7 +92,42 @@ const AppRouter: React.FC = () => {
           )
         }
       />
-
+       <Route
+        path="/register"
+        element={
+          isAuthenticated ? (
+            <Navigate to="/dashboard/home" replace />
+          ) : (
+            <div style={{
+              minHeight: '100vh', // 确保容器至少和视口一样高
+              display: 'flex',
+              alignItems: 'center', // 垂直居中
+              justifyContent: 'center', // 水平居中
+              backgroundColor: '#f3f4f6' // 可选：设置页面背景色 (Tailwind gray-100)
+            }}>
+              <RegisterForm />
+            </div>
+          )
+        }
+      />
+      <Route
+        path="/forgot-password"
+        element={
+          isAuthenticated ? (
+            <Navigate to="/dashboard/home" replace />
+          ) : (
+            <div style={{
+              minHeight: '100vh', // 确保容器至少和视口一样高
+              display: 'flex',
+              alignItems: 'center', // 垂直居中
+              justifyContent: 'center', // 水平居中
+              backgroundColor: '#f3f4f6' // 可选：设置页面背景色 (Tailwind gray-100)
+            }}>
+              <ForgotPasswordForm />
+            </div>
+          )
+        }
+      />
       {/* 仪表盘/主应用路由 (父路由) */}
       <Route
         path="/dashboard"
