@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-// 1. 导入 react-router-dom 相关组件
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 // --- 图标占位符 (与之前版本相同) ---
 const HomeIcon = () => <span>🏠</span>;
@@ -19,27 +17,28 @@ const DownloadIcon = () => <span>⬇️</span>;
 const RenewIcon = () => <span>🔄</span>;
 const MenuIcon = () => <span>☰</span>;
 const UserProfileIcon = () => <span className="text-sm font-semibold">ME</span>;
-// WalletIcon, TrafficIcon, CommissionIcon, RefreshIcon, ConnectNodeIcon, KnowledgeBaseIcon, ResetTrafficIcon 已在 HomePageContent 中使用
+const WalletIcon = () => <span>💼</span>;
+const TrafficIcon = () => <span>📊</span>;
+const CommissionIcon = () => <span>🪙</span>;
+const RefreshIcon = () => <span>🔃</span>;
+const ConnectNodeIcon = () => <span>🔗</span>;
+const KnowledgeBaseIcon = () => <span>📚</span>;
+const ResetTrafficIcon = () => <span>♻️</span>;
 const LogoutIcon = () => <span>🚪</span>;
 
-// --- 导航项类型定义 (component 属性不再由此组件直接使用，而是由路由配置使用) ---
+// --- 导航项类型定义 (与之前版本相同) ---
 interface NavItem {
   id: string;
   label: string;
   icon?: React.ReactNode;
-  path: string; // path 现在用于 Link to 和路由匹配
+  path?: string;
   isCategoryLabel?: boolean;
   subItems?: NavItem[];
-  // component?: React.FC; // 这个属性将由 main.tsx 中的路由配置使用
+  component?: React.FC; // 新增: 用于指定该导航项对应的组件
 }
 
-// --- 占位符页面组件定义 (这些组件的实际内容应在各自的文件中) ---
-// 您应该将这些组件移动到各自的文件中，例如 src/pages/HomePageContent.tsx 等
-// 并在这里导入它们，或者直接在 main.tsx 的路由配置中引用它们的文件路径。
-// 为了演示，暂时保留在这里。
-
-const HomePageContent: React.FC = () => { 
-  const WalletIcon = () => <span>💼</span>; const TrafficIcon = () => <span>📊</span>; const CommissionIcon = () => <span>🪙</span>; const RefreshIcon = () => <span>🔃</span>; const ConnectNodeIcon = () => <span>🔗</span>; const KnowledgeBaseIcon = () => <span>📚</span>; const ResetTrafficIcon = () => <span>♻️</span>;
+// --- 1. 为每个可导航页面创建占位符组件 ---
+const HomePageContent: React.FC = () => { /* ... (首页内容与之前版本相同，此处省略以减少重复) ... */ 
   const walletBalance = "0 CNY"; const lastRecord = "0 CNY"; const totalTraffic = "130 GB"; const remainingTraffic = "26.33 GB"; const usedTraffic = "103.67 GB"; const trafficUsagePercentage = 80; const availableCommission = "0 CNY"; const pendingCommission = "0 CNY";
   const subscription = { name: "130G 流量 - 不限时间", status: "该订阅长期有效!" };
   return (
@@ -64,6 +63,8 @@ const HomePageContent: React.FC = () => {
     </div>
   );
 };
+
+// --- 其他页面组件占位符 ---
 const DocsPage: React.FC = () => <div className="p-6"><h1 className="text-2xl font-bold text-gray-800">使用文档</h1><p className="mt-2 text-gray-600">这里是使用文档的内容。</p></div>;
 const PurchaseSubscriptionPage: React.FC = () => <div className="p-6"><h1 className="text-2xl font-bold text-gray-800">购买订阅</h1><p className="mt-2 text-gray-600">这里是购买订阅的选项和流程。</p></div>;
 const NodeStatusPage: React.FC = () => <div className="p-6"><h1 className="text-2xl font-bold text-gray-800">节点状态</h1><p className="mt-2 text-gray-600">这里显示所有节点的状态信息。</p></div>;
@@ -72,36 +73,33 @@ const MyInvitationsPage: React.FC = () => <div className="p-6"><h1 className="te
 const PersonalCenterPage: React.FC = () => <div className="p-6"><h1 className="text-2xl font-bold text-gray-800">个人中心</h1><p className="mt-2 text-gray-600">这里可以修改您的个人信息和设置。</p></div>;
 const TrafficDetailsPage: React.FC = () => <div className="p-6"><h1 className="text-2xl font-bold text-gray-800">流量明细</h1><p className="mt-2 text-gray-600">这里显示您的详细流量使用情况。</p></div>;
 const MyTicketsPage: React.FC = () => <div className="p-6"><h1 className="text-2xl font-bold text-gray-800">我的工单</h1><p className="mt-2 text-gray-600">这里是您提交的工单和处理状态。</p></div>;
-// NotFoundPage 可以在 main.tsx 的路由配置中使用
+const NotFoundPage: React.FC = () => <div className="p-6"><h1 className="text-2xl font-bold text-red-500">404 - 页面未找到</h1><p className="mt-2 text-gray-600">抱歉，您访问的页面不存在。</p></div>;
 
 
-// --- 更新侧边栏导航数据，移除 component 属性，path 用于 Link ---
+// --- 2. 更新侧边栏导航数据，关联组件 ---
 const sidebarNavigation: NavItem[] = [
-  { id: 'home', label: '首页', icon: <HomeIcon />, path: 'home' }, // path 相对于父路由
-  { id: 'docs', label: '使用文档', icon: <DocsIcon />, path: 'docs' },
+  { id: 'home', label: '首页', icon: <HomeIcon />, path: '/dashboard', component: HomePageContent },
+  { id: 'docs', label: '使用文档', icon: <DocsIcon />, path: '/docs', component: DocsPage },
   {
-    id: 'storeCategory', label: '商店', isCategoryLabel: true, path: '', // 分类标签通常没有自己的路径
-    icon: <StoreCategoryIcon />,
+    id: 'storeCategory', label: '商店', isCategoryLabel: true, icon: <StoreCategoryIcon />,
     subItems: [
-      { id: 'purchaseSubscription', label: '购买订阅', icon: <PurchaseSubscriptionIcon />, path: 'store/purchase' },
-      { id: 'nodeStatus', label: '节点状态', icon: <NodeStatusIcon />, path: 'store/status' },
+      { id: 'purchaseSubscription', label: '购买订阅', icon: <PurchaseSubscriptionIcon />, path: '/store/purchase', component: PurchaseSubscriptionPage },
+      { id: 'nodeStatus', label: '节点状态', icon: <NodeStatusIcon />, path: '/store/status', component: NodeStatusPage },
     ],
   },
   {
-    id: 'financeCategory', label: '财务', isCategoryLabel: true, path: '',
-    icon: <FinanceCategoryIcon />,
+    id: 'financeCategory', label: '财务', isCategoryLabel: true, icon: <FinanceCategoryIcon />,
     subItems: [
-      { id: 'myOrders', label: '我的订单', icon: <MyOrdersIcon />, path: 'finance/orders' },
-      { id: 'myInvitations', label: '我的邀请', icon: <MyInvitationsIcon />, path: 'finance/invitations' },
+      { id: 'myOrders', label: '我的订单', icon: <MyOrdersIcon />, path: '/finance/orders', component: MyOrdersPage },
+      { id: 'myInvitations', label: '我的邀请', icon: <MyInvitationsIcon />, path: '/finance/invitations', component: MyInvitationsPage },
     ],
   },
   {
-    id: 'userCategory', label: '用户', isCategoryLabel: true, path: '',
-    icon: <UserCategoryIcon />,
+    id: 'userCategory', label: '用户', isCategoryLabel: true, icon: <UserCategoryIcon />,
     subItems: [
-      { id: 'personalCenter', label: '个人中心', icon: <PersonalCenterIcon />, path: 'user/profile' },
-      { id: 'trafficDetails', label: '流量明细', icon: <TrafficDetailsIcon />, path: 'user/traffic' },
-      { id: 'myTickets', label: '我的工单', icon: <MyTicketsIcon />, path: 'user/tickets' },
+      { id: 'personalCenter', label: '个人中心', icon: <PersonalCenterIcon />, path: '/user/profile', component: PersonalCenterPage },
+      { id: 'trafficDetails', label: '流量明细', icon: <TrafficDetailsIcon />, path: '/user/traffic', component: TrafficDetailsPage },
+      { id: 'myTickets', label: '我的工单', icon: <MyTicketsIcon />, path: '/user/tickets', component: MyTicketsPage },
     ],
   },
 ];
@@ -112,30 +110,10 @@ interface UserDashboardLayoutProps {
 }
 
 const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ onLogout }) => {
-  const location = useLocation(); // 获取当前路由位置
-  const navigate = useNavigate(); // 获取导航函数
+  const [activePageId, setActivePageId] = useState<string>('home');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
-
-  // 根据当前路径确定激活的导航项ID
-  const getActivePageIdFromPath = (pathname: string) => {
-    // 假设 UserDashboardLayout 挂载在 /dashboard 路径下
-    // 那么 pathname 会是 /dashboard/home, /dashboard/docs 等
-    const relativePath = pathname.startsWith('/dashboard/') ? pathname.substring('/dashboard/'.length) : pathname;
-    
-    for (const item of sidebarNavigation) {
-      if (item.path === relativePath && !item.isCategoryLabel) return item.id;
-      if (item.subItems) {
-        for (const subItem of item.subItems) {
-          if (subItem.path === relativePath) return subItem.id;
-        }
-      }
-    }
-    return 'home'; // 默认返回 home
-  };
-  const activePageId = getActivePageIdFromPath(location.pathname);
-
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -147,51 +125,31 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ onLogout }) =
     return () => { document.removeEventListener('mousedown', handleClickOutside); };
   }, []);
 
-  const handleSidebarLinkClick = () => {
-    if (window.innerWidth < 768) { // 如果是小屏幕，点击链接后关闭侧边栏
-       setIsSidebarOpen(false);
+  const handleNavClick = (item: NavItem) => {
+    if (!item.isCategoryLabel && item.path) {
+      setActivePageId(item.id);
+      if (window.innerWidth < 768 && !item.subItems) {
+         setIsSidebarOpen(false);
+      }
     }
   };
 
-  const renderNavMenuItems = (items: NavItem[]) => {
+  const renderNavMenuItems = (items: NavItem[]) => { /* ... (与之前版本相同，此处省略) ... */
     return items.map(item => (
       <React.Fragment key={item.id}>
         {item.isCategoryLabel ? (
           <div className="px-4 pt-4 pb-1"><span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{item.label}</span></div>
         ) : (
-          // 2. 使用 Link 组件进行导航
-          <Link
-            to={item.path} // 使用 item.path 作为链接目标
-            onClick={handleSidebarLinkClick}
-            className={`flex items-center py-2.5 px-4 cursor-pointer transition-colors rounded-md mx-2 
-              ${activePageId === item.id 
-                ? 'bg-blue-500 text-white font-medium shadow-sm' 
-                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-800'
-              }
-            `}
-          >
-            <span className="mr-3 w-5 flex items-center justify-center">{item.icon}</span>
-            <span>{item.label}</span>
-          </Link>
+          <div onClick={() => handleNavClick(item)} className={`flex items-center py-2.5 px-4 cursor-pointer transition-colors rounded-md mx-2 ${activePageId === item.id ? 'bg-blue-500 text-white font-medium shadow-sm' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-800'}`}>
+            <span className="mr-3 w-5 flex items-center justify-center">{item.icon}</span><span>{item.label}</span>
+          </div>
         )}
         {item.isCategoryLabel && item.subItems && (
           <div className="mt-1 mb-2">
             {item.subItems.map(subItem => (
-              // 2. 子项也使用 Link 组件
-              <Link
-                key={subItem.id}
-                to={subItem.path} // 使用 subItem.path
-                onClick={handleSidebarLinkClick}
-                className={`flex items-center py-2 pl-10 pr-4 cursor-pointer transition-colors rounded-md mx-2 text-sm 
-                  ${activePageId === subItem.id 
-                    ? 'bg-blue-100 text-blue-600 font-medium' 
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
-                  }
-                `}
-              >
-                <span className="mr-3 w-5 flex items-center justify-center">{subItem.icon}</span>
-                <span>{subItem.label}</span>
-              </Link>
+              <div key={subItem.id} onClick={() => handleNavClick(subItem)} className={`flex items-center py-2 pl-10 pr-4 cursor-pointer transition-colors rounded-md mx-2 text-sm ${activePageId === subItem.id ? 'bg-blue-100 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'}`}>
+                <span className="mr-3 w-5 flex items-center justify-center">{subItem.icon}</span><span>{subItem.label}</span>
+              </div>
             ))}
           </div>
         )}
@@ -199,36 +157,46 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ onLogout }) =
     ));
   };
   
-  const getCurrentPageLabel = () => {
-    for (const item of sidebarNavigation) {
-      if (item.id === activePageId && !item.isCategoryLabel) return item.label;
+  const findCurrentPageData = (items: NavItem[], id: string): NavItem | undefined => {
+    for (const item of items) {
+      if (item.id === id && item.component) return item; // 只返回有组件的项
       if (item.subItems) {
-        for (const subItem of item.subItems) {
-          if (subItem.id === activePageId) return subItem.label;
-        }
+        const foundInSub = findCurrentPageData(item.subItems, id);
+        if (foundInSub && foundInSub.component) return foundInSub;
       }
     }
-    return sidebarNavigation.find(item => item.id === 'home')?.label || '仪表盘';
+    return undefined;
   };
-  const currentPageLabel = getCurrentPageLabel();
+  
+  // 3. 渲染当前激活页面的组件
+  const renderActivePageComponent = () => {
+    const currentPageData = findCurrentPageData(sidebarNavigation, activePageId);
+    if (currentPageData && currentPageData.component) {
+      const PageComponent = currentPageData.component;
+      return <PageComponent />;
+    }
+    // 如果找不到对应组件或当前是分类标签，可以显示首页或一个默认/404页面
+    const homePageData = sidebarNavigation.find(item => item.id === 'home');
+    if (homePageData && homePageData.component){
+        const HomePage = homePageData.component;
+        return <HomePage/>; // 默认或回退到首页
+    }
+    return <NotFoundPage />; // 或者一个更通用的错误/占位组件
+  };
+  
+  const currentPageLabel = findCurrentPageData(sidebarNavigation, activePageId)?.label || sidebarNavigation.find(item => item.id === 'home')?.label || '仪表盘';
+
 
   const handleLogoutClick = () => {
     setIsUserMenuOpen(false);
     if (onLogout) onLogout();
-    else {
-      console.warn("onLogout prop not provided to UserDashboardLayout");
-      // 默认客户端退出逻辑 (示例)
-      localStorage.removeItem('userToken'); // 清除 token
-      navigate('/login'); // 跳转到登录页
-    }
+    else console.warn("onLogout prop not provided to UserDashboardLayout");
   };
 
   return (
     <div className="flex h-screen bg-gray-100 font-sans">
       <aside className={` ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed inset-y-0 left-0 z-30 w-60 bg-white shadow-lg transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:shadow-none md:border-r md:border-gray-200 flex flex-col`}>
-        <div className="flex items-center justify-center h-16 border-b border-gray-200 px-4">
-          <Link to="home" className="text-xl font-bold text-blue-600 whitespace-nowrap overflow-hidden overflow-ellipsis">应用平台名称</Link>
-        </div>
+        <div className="flex items-center justify-center h-16 border-b border-gray-200 px-4"><span className="text-xl font-bold text-blue-600 whitespace-nowrap overflow-hidden overflow-ellipsis">应用平台名称</span></div>
         <nav className="pt-2 pb-4 flex-grow overflow-y-auto">{renderNavMenuItems(sidebarNavigation)}</nav>
       </aside>
 
@@ -255,9 +223,9 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ onLogout }) =
             </div>
           </div>
         </header>
-        {/* 3. 使用 Outlet 渲染子路由对应的组件 */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-0"> {/* 移除内边距，让子页面组件自己控制 */}
-          <Outlet />
+        {/* 4. 修改 main 区域以渲染动态组件 */}
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
+          {renderActivePageComponent()}
         </main>
       </div>
     </div>
@@ -265,66 +233,3 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ onLogout }) =
 };
 
 export default UserDashboardLayout;
-
-// --- 如何在您的应用中使用 (main.tsx 示例) ---
-// import React from 'react';
-// import ReactDOM from 'react-dom/client';
-// import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-// import AuthLayoutWithMyDesign from './components/AuthLayoutWithMyDesign';
-// import UserDashboardLayout from './components/UserDashboardLayout';
-
-// // 导入所有页面组件
-// import { HomePageContent, DocsPage, PurchaseSubscriptionPage, NodeStatusPage, MyOrdersPage, MyInvitationsPage, PersonalCenterPage, TrafficDetailsPage, MyTicketsPage } from './components/UserDashboardLayout'; // 或者从各自文件导入
-// const NotFoundPage = () => <div className="p-6"><h1 className="text-2xl font-bold text-red-500">404 - 页面未找到</h1><p>抱歉，您访问的页面不存在。</p></div>;
-
-
-// const AppRouter: React.FC = () => {
-//   const [isAuthenticated, setIsAuthenticated] = React.useState<boolean>(!!localStorage.getItem('userToken'));
-//   const navigate = useNavigate(); // 在 BrowserRouter 内部使用
-
-//   const handleLoginSuccess = (token: string) => {
-//     localStorage.setItem('userToken', token);
-//     setIsAuthenticated(true);
-//     navigate('/dashboard/home'); // 登录后跳转到仪表盘首页
-//   };
-
-//   const handleLogout = () => {
-//     localStorage.removeItem('userToken');
-//     setIsAuthenticated(false);
-//     navigate('/login'); // 退出后跳转到登录页
-//   };
-
-//   return (
-//     <Routes>
-//       <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard/home" replace /> : <AuthLayoutWithMyDesign onUserAuthenticated={handleLoginSuccess} />} />
-//       <Route path="/dashboard" element={isAuthenticated ? <UserDashboardLayout onLogout={handleLogout} /> : <Navigate to="/login" replace />}>
-//         {/* 定义 UserDashboardLayout 的子路由 */}
-//         <Route index element={<Navigate to="home" replace />} /> {/* /dashboard 默认重定向到 /dashboard/home */}
-//         <Route path="home" element={<HomePageContent />} />
-//         <Route path="docs" element={<DocsPage />} />
-//         <Route path="store/purchase" element={<PurchaseSubscriptionPage />} />
-//         <Route path="store/status" element={<NodeStatusPage />} />
-//         <Route path="finance/orders" element={<MyOrdersPage />} />
-//         <Route path="finance/invitations" element={<MyInvitationsPage />} />
-//         <Route path="user/profile" element={<PersonalCenterPage />} />
-//         <Route path="user/traffic" element={<TrafficDetailsPage />} />
-//         <Route path="user/tickets" element={<MyTicketsPage />} />
-//         <Route path="*" element={<NotFoundPage />} /> {/* 仪表盘内部的404 */}
-//       </Route>
-//       <Route path="/" element={<Navigate to={isAuthenticated ? "/dashboard/home" : "/login"} replace />} />
-//       <Route path="*" element={<NotFoundPage />} /> {/* 应用全局的404 */}
-//     </Routes>
-//   );
-// };
-
-// const MainApp = () => (
-//   <BrowserRouter>
-//     <AppRouter />
-//   </BrowserRouter>
-// );
-
-// ReactDOM.createRoot(document.getElementById('root')!).render(
-//   <React.StrictMode>
-//     <MainApp />
-//   </React.StrictMode>,
-// );

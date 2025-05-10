@@ -1,11 +1,11 @@
-// src/components/LoginForm.tsx (仅添加 onUserAuthenticated prop 功能)
+// src/components/LoginForm.tsx (集成真实登录 API - 使用 auth_data)
 
 import React, { useState, type FormEvent } from 'react';
 
 // --- 辅助 SVG 组件定义 (保持不变) ---
 
-// 加载图标 - 用于浅灰色按钮 (深色图标)
-const LoadingSpinnerGray = ({ color = "#4B5563", size = 20 }: { color?: string; size?: number }) => { // Default color gray-600
+// 加载图标
+const LoadingSpinnerGray = ({ color = "#4B5563", size = 20 }: { color?: string; size?: number }) => {
     return (
         <svg className="animate-spin" style={{ color: color, height: size, width: size }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -14,7 +14,7 @@ const LoadingSpinnerGray = ({ color = "#4B5563", size = 20 }: { color?: string; 
     );
 };
 
-// 占位符 Logo - 使用柔和灰色 (保持不变)
+// 占位符 Logo
 const AppLogo = () => {
     return (
          <div className="mb-6 h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-2xl">
@@ -23,13 +23,12 @@ const AppLogo = () => {
     );
 };
 
-// --- 1. 定义 LoginForm 组件的 Props 类型 ---
+// --- LoginForm 组件的 Props 类型 ---
 interface LoginFormProps {
-  onUserAuthenticated: (token: string) => void;
+  onUserAuthenticated: (token: string) => void; // token 现在是 auth_data 的值
 }
 
-// --- 2. 修改 LoginForm 组件以接收并使用 onUserAuthenticated Prop ---
-// 将原来的 export default function LoginForm() 修改为 const LoginForm: React.FC<LoginFormProps>
+// --- LoginForm 组件逻辑 ---
 const LoginForm: React.FC<LoginFormProps> = ({ onUserAuthenticated }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -39,25 +38,49 @@ const LoginForm: React.FC<LoginFormProps> = ({ onUserAuthenticated }) => {
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setError(null);
+
+        // 前端基本验证 (保持不变)
         if (!email || !/\S+@\S+\.\S+/.test(email)) { setError('请输入有效的邮箱地址'); return; }
         if (!password) { setError('请输入密码'); return; }
         if (password.length < 8) { setError('密码长度不能少于8位'); return; }
+
         setIsLoading(true);
-        console.log("模拟登录 (Vite):", { email });
+        console.log("尝试登录:", { email });
+
         try {
-            await new Promise(resolve => setTimeout(resolve, 1000)); // 模拟 API 延迟
-            const mockSignInResult = { ok: true, error: null, token: "fake-token-from-original-loginform" }; // 模拟成功
-            
-            if (mockSignInResult.ok && mockSignInResult.token) {
-                // 3. 在登录成功时，调用从 props 接收到的 onUserAuthenticated 函数
-                onUserAuthenticated(mockSignInResult.token);
-                // 原来的 alert 和跳转逻辑已移除，现在由父组件处理
-            } else {
-                setError(mockSignInResult.error || '邮箱或密码错误，请重试。');
+            const response = await fetch('https://wujie.one/api/v1/passport/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password,
+                }),
+            });
+
+            const responseData = await response.json();
+
+            if (!response.ok) {
+                setError(responseData.message || `请求失败，状态码: ${response.status}`);
+                setIsLoading(false);
+                return;
             }
+
+            // --- 修改开始: 使用 responseData.data.auth_data ---
+            if (responseData.status === "success" && responseData.data && responseData.data.auth_data) {
+                console.log("登录成功，Auth Data:", responseData.data.auth_data);
+                // 调用从 props 接收到的 onUserAuthenticated 函数，并传递 auth_data
+                onUserAuthenticated(responseData.data.auth_data);
+            } else {
+                // API 返回了成功状态码，但业务逻辑上失败 (例如 status 不是 "success" 或缺少 auth_data)
+                setError(responseData.message || '登录失败，请检查您的凭据或联系支持。');
+            }
+            // --- 修改结束 ---
+
         } catch (err: any) {
-            console.error('登录时发生意外错误:', err);
-            setError(err.message || '发生未知错误，请稍后重试。');
+            console.error('登录 API 调用时发生错误:', err);
+            setError(err.message || '发生网络错误或未知错误，请稍后重试。');
         } finally {
             setIsLoading(false);
         }
@@ -112,5 +135,4 @@ const LoginForm: React.FC<LoginFormProps> = ({ onUserAuthenticated }) => {
     );
 };
 
-// 4. 确保默认导出的是 LoginForm
 export default LoginForm;
