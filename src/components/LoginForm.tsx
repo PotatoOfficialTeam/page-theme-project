@@ -1,10 +1,8 @@
-// src/components/LoginForm.tsx (修复 Spinner 错误 - 浅色主题 for Vite)
+// src/components/LoginForm.tsx (仅添加 onUserAuthenticated prop 功能)
 
 import React, { useState, type FormEvent } from 'react';
-// import { useNavigate } from 'react-router-dom'; // **ROUTER_REPLACE**: 如果需要内部路由
-// import { Link } from 'react-router-dom'; // **ROUTER_REPLACE**
 
-// --- 辅助 SVG 组件定义 ---
+// --- 辅助 SVG 组件定义 (保持不变) ---
 
 // 加载图标 - 用于浅灰色按钮 (深色图标)
 const LoadingSpinnerGray = ({ color = "#4B5563", size = 20 }: { color?: string; size?: number }) => { // Default color gray-600
@@ -15,9 +13,8 @@ const LoadingSpinnerGray = ({ color = "#4B5563", size = 20 }: { color?: string; 
         </svg>
     );
 };
-// 移除了未使用的 LoadingSpinnerWhite 定义
 
-// 占位符 Logo - 使用柔和灰色
+// 占位符 Logo - 使用柔和灰色 (保持不变)
 const AppLogo = () => {
     return (
          <div className="mb-6 h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-2xl">
@@ -26,8 +23,14 @@ const AppLogo = () => {
     );
 };
 
-// --- LoginForm 组件逻辑 ---
-export default function LoginForm() {
+// --- 1. 定义 LoginForm 组件的 Props 类型 ---
+interface LoginFormProps {
+  onUserAuthenticated: (token: string) => void;
+}
+
+// --- 2. 修改 LoginForm 组件以接收并使用 onUserAuthenticated Prop ---
+// 将原来的 export default function LoginForm() 修改为 const LoginForm: React.FC<LoginFormProps>
+const LoginForm: React.FC<LoginFormProps> = ({ onUserAuthenticated }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -43,11 +46,12 @@ export default function LoginForm() {
         console.log("模拟登录 (Vite):", { email });
         try {
             await new Promise(resolve => setTimeout(resolve, 1000)); // 模拟 API 延迟
-            const mockSignInResult = { ok: true, error: null, token: "fake-token" }; // 模拟成功
-            if (mockSignInResult.ok) {
-                alert('模拟登录成功！准备跳转...'); // 占位提示
-                console.log('将跳转到 Umi 应用...');
-                // **VITE_REPLACE**: window.location.href = `YOUR_UMIJS_APP_URL/dashboard#token=${mockSignInResult.token}`;
+            const mockSignInResult = { ok: true, error: null, token: "fake-token-from-original-loginform" }; // 模拟成功
+            
+            if (mockSignInResult.ok && mockSignInResult.token) {
+                // 3. 在登录成功时，调用从 props 接收到的 onUserAuthenticated 函数
+                onUserAuthenticated(mockSignInResult.token);
+                // 原来的 alert 和跳转逻辑已移除，现在由父组件处理
             } else {
                 setError(mockSignInResult.error || '邮箱或密码错误，请重试。');
             }
@@ -62,21 +66,16 @@ export default function LoginForm() {
     const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => { setEmail(e.target.value); if (error) setError(null); };
     const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => { setPassword(e.target.value); if (error) setError(null); };
 
-    // --- JSX (纯白卡片 - 强阴影 - 更柔和边缘灰色元素) ---
+    // --- JSX (保持不变) ---
     return (
-        // 卡片容器: 宽度 max-w-xl, 背景 bg-white, 圆角 rounded-2xl, 阴影 shadow-2xl
         <div className="w-full max-w-xl rounded-2xl bg-white p-10 shadow-2xl">
-            {/* Logo 和标题 */}
             <div className="mb-10 flex flex-col items-center text-center">
-                <AppLogo /> {/* 使用更柔和灰色 Logo */}
+                <AppLogo />
                 <h1 className="mt-5 text-3xl font-medium text-gray-900">
                     登录您的账户
                 </h1>
             </div>
-
-            {/* 单个表单 */}
             <form onSubmit={handleSubmit} className="space-y-8" noValidate>
-                {/* Email Input */}
                 <div>
                     <input
                         id="email" name="email" type="email" required value={email} onChange={handleEmailChange}
@@ -84,8 +83,6 @@ export default function LoginForm() {
                         placeholder="电子邮箱或电话号码" disabled={isLoading} aria-invalid={!!error?.includes('邮箱')} aria-describedby="form-error-msg"
                     />
                 </div>
-
-                {/* Password Input */}
                 <div>
                     <input
                         id="password" name="password" type="password" required value={password} onChange={handlePasswordChange}
@@ -93,27 +90,17 @@ export default function LoginForm() {
                         placeholder="密码" disabled={isLoading} aria-invalid={!!error?.includes('密码')} aria-describedby="form-error-msg"
                     />
                 </div>
-
-                 {/* 忘记密码链接 */}
                  <div className="text-right text-sm">
                     <a href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:underline">忘记了密码?</a>
                  </div>
-
-                 {/* 统一的错误信息显示 */}
                  <div className="min-h-[20px] text-center text-sm">
                     {error && ( <p id="form-error-msg" className="text-red-600">{error}</p> )}
                  </div>
-
-                {/* Final Login Button - 使用浅灰色和柔和边缘 */}
                 <button type="submit"
-                        // 移除边框，使用更浅的灰色背景，保留 shadow-sm，调整 hover 和 focus
-                        className={`relative flex w-full justify-center rounded-lg border-none bg-gray-100 px-6 py-2.5 text-sm font-medium text-gray-600 shadow-sm transition-colors hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 disabled:opacity-70 ${isLoading ? 'cursor-not-allowed' : ''}`} // 保持柔和灰色按钮样式
+                        className={`relative flex w-full justify-center rounded-lg border-none bg-gray-100 px-6 py-2.5 text-sm font-medium text-gray-600 shadow-sm transition-colors hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 disabled:opacity-70 ${isLoading ? 'cursor-not-allowed' : ''}`}
                         disabled={isLoading}>
-                    {/* 使用灰色加载图标 */}
-                    {isLoading ? <LoadingSpinnerGray /> : '登录'} {/* 确认使用 LoadingSpinnerGray */}
+                    {isLoading ? <LoadingSpinnerGray /> : '登录'}
                 </button>
-
-                 {/* 创建账户链接 */}
                  <div className='text-center text-sm pt-2'>
                      <p className="text-gray-600">
                          还没有账户?{' '}
@@ -123,5 +110,7 @@ export default function LoginForm() {
             </form>
         </div>
     );
-}
+};
 
+// 4. 确保默认导出的是 LoginForm
+export default LoginForm;
