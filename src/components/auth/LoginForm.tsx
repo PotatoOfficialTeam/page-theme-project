@@ -1,6 +1,10 @@
-// src/components/LoginForm.tsx (集成真实登录 API - 使用 auth_data)
-
+// src/components/auth/LoginForm.tsx
+// 从 src/components/LoginForm.tsx 迁移
+// 主要更新了导入路径和使用 API 服务
 import React, { useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
+import { ROUTES } from '../../config/routes';
+import { login } from '../../api/auth';
 
 // --- 辅助 SVG 组件定义 (保持不变) ---
 
@@ -48,26 +52,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onUserAuthenticated }) => {
         console.log("尝试登录:", { email });
 
         try {
-            const response = await fetch('https://wujie.one/api/v1/passport/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: email,
-                    password: password,
-                }),
-            });
+            const responseData = await login(email, password);
 
-            const responseData = await response.json();
-
-            if (!response.ok) {
-                setError(responseData.message || `请求失败，状态码: ${response.status}`);
-                setIsLoading(false);
-                return;
-            }
-
-            // --- 修改开始: 使用 responseData.data.auth_data ---
             if (responseData.status === "success" && responseData.data && responseData.data.auth_data) {
                 console.log("登录成功，Auth Data:", responseData.data.auth_data);
                 // 调用从 props 接收到的 onUserAuthenticated 函数，并传递 auth_data
@@ -76,7 +62,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onUserAuthenticated }) => {
                 // API 返回了成功状态码，但业务逻辑上失败 (例如 status 不是 "success" 或缺少 auth_data)
                 setError(responseData.message || '登录失败，请检查您的凭据或联系支持。');
             }
-            // --- 修改结束 ---
 
         } catch (err: any) {
             console.error('登录 API 调用时发生错误:', err);
@@ -114,7 +99,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onUserAuthenticated }) => {
                     />
                 </div>
                  <div className="text-right text-sm">
-                    <a href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:underline">忘记了密码?</a>
+                    <Link to={ROUTES.AUTH.FORGOT_PASSWORD} className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:underline">忘记了密码?</Link>
                  </div>
                  <div className="min-h-[20px] text-center text-sm">
                     {error && ( <p id="form-error-msg" className="text-red-600">{error}</p> )}
@@ -127,7 +112,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onUserAuthenticated }) => {
                  <div className='text-center text-sm pt-2'>
                      <p className="text-gray-600">
                          还没有账户?{' '}
-                         <a href="/register" className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:underline">创建账户</a>
+                         <Link to={ROUTES.AUTH.REGISTER} className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:underline">创建账户</Link>
                      </p>
                  </div>
             </form>

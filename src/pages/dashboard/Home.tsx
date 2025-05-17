@@ -1,4 +1,6 @@
-// src/pages/HomePageContent.tsx
+// src/pages/dashboard/Home.tsx
+// 这个文件将从 src/pages/HomePageContent.tsx 迁移而来
+// 确保更新路径和导入
 import React from 'react';
 
 // 您可以在这里定义或从其他地方导入这些图标组件
@@ -11,7 +13,7 @@ const ConnectNodeIcon = () => <span>🔗</span>;
 const KnowledgeBaseIcon = () => <span>📚</span>;
 const ResetTrafficIcon = () => <span>♻️</span>;
 
-const HomePageContent: React.FC = () => {
+const Home: React.FC = () => {
   // 模拟数据 (与您提供的一致)
   const walletBalance = "0 CNY";
   const lastRecord = "0 CNY";
@@ -115,4 +117,4 @@ const HomePageContent: React.FC = () => {
   );
 };
 
-export default HomePageContent;
+export default Home;

@@ -1,8 +1,12 @@
-// src/components/ForgotPasswordForm.tsx (忘记密码表单 - 浅色主题 - 宽卡片 - 强阴影 - 使用 Link)
+// src/components/auth/ForgotPasswordForm.tsx
+// 从 src/components/ForgotPasswordForm.tsx 迁移
+// 主要更新了导入路径和使用 API 服务
 'use client'; // 虽然 Vite 不用，但保留无害
 
 import React, { useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom'; // 1. 导入 Link 组件
+import { Link } from 'react-router-dom';
+import { ROUTES } from '../../config/routes';
+import { requestPasswordReset } from '../../api/auth';
 
 // --- 辅助 SVG 组件定义 ---
 const LoadingSpinnerGray = ({ color = "#4B5563", size = 20 }: { color?: string; size?: number }) => { // 用于浅灰色按钮
@@ -46,13 +50,8 @@ export default function ForgotPasswordForm() {
 
         setIsLoading(true);
 
-        // --- 模拟/调用后端发送重置链接的 API ---
-        console.log('请求发送密码重置链接至:', email);
-        // **VITE_REPLACE**: 这里需要替换为调用你实际的后端 API
         try {
-            await new Promise(resolve => setTimeout(resolve, 1500)); // 模拟网络延迟
-            // 模拟成功
-            console.log("模拟发送成功!");
+            await requestPasswordReset(email);
             setSuccessMessage('如果该邮箱地址在我们系统中存在，密码重置说明邮件已发送。请检查您的收件箱（包括垃圾邮件）。');
             setEmail(''); // 清空邮箱输入
         } catch (error: any) {
@@ -61,7 +60,6 @@ export default function ForgotPasswordForm() {
         } finally {
             setIsLoading(false);
         }
-        // --- 模拟结束 ---
     };
 
     // 输入框内容变化时清除消息
@@ -116,8 +114,8 @@ export default function ForgotPasswordForm() {
                  {/* Link back to Login */}
                  <p className="text-center text-sm text-gray-600">
                      记起密码了？{' '}
-                     {/* 2. 将 a 标签替换为 Link 组件 */}
-                     <Link to="/" className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:underline">
+                     {/* 使用 react-router-dom 的 Link 组件 */}
+                     <Link to={ROUTES.AUTH.LOGIN} className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:underline">
                          返回登录
                      </Link>
                  </p>
@@ -125,4 +123,3 @@ export default function ForgotPasswordForm() {
         </div>
     );
 }
-

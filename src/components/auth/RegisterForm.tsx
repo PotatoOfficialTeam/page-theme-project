@@ -1,8 +1,10 @@
-// src/components/RegisterForm.tsx (注册表单 - 浅色主题 - 宽卡片 - 强阴影 - 使用 Link)
-'use client';
-
+// src/components/auth/RegisterForm.tsx
+// 从 src/components/RegisterForm.tsx 迁移
+// 主要更新了导入路径和使用 API 服务
 import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // 导入 Link 和 useNavigate
+import { Link, useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../config/routes';
+import { register } from '../../api/auth';
 
 // --- 辅助 SVG 组件定义 ---
 const LoadingSpinnerGray = ({ color = "#4B5563", size = 20 }: { color?: string; size?: number }) => { // 用于浅灰色按钮
@@ -56,14 +58,13 @@ export default function RegisterForm() {
         if (validateForm()) {
             setIsLoading(true);
             console.log('注册信息校验通过，准备提交:', { name, email }); // 不打印密码
-            // **VITE_REPLACE**: 替换为实际的后端 API 调用来注册
+            
             try {
-                // --- 模拟后端注册 API 调用 ---
-                await new Promise(resolve => setTimeout(resolve, 1500)); // 模拟网络延迟
-                console.log("模拟注册成功！");
+                // 使用 API 服务而不是直接调用
+                const response = await register(name, email, password);
+                console.log("注册成功！", response);
                 alert("注册成功！将跳转到登录页面。"); // 临时提示
-                navigate('/'); // 注册成功后跳转回根路径 (登录页)
-                // --- 模拟结束 ---
+                navigate(ROUTES.AUTH.LOGIN); // 注册成功后跳转到登录页
             } catch (error: any) {
                  console.error('注册失败:', error);
                  setErrors({ form: error.message || "注册过程中发生错误，请稍后再试。" });
@@ -163,7 +164,7 @@ export default function RegisterForm() {
                  <p className="text-center text-sm text-gray-600">
                      已有账户？{' '}
                      {/* 使用 react-router-dom 的 Link 组件 */}
-                     <Link to="/" className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:underline">
+                     <Link to={ROUTES.AUTH.LOGIN} className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:underline">
                          前往登录
                      </Link>
                  </p>
@@ -171,4 +172,3 @@ export default function RegisterForm() {
         </div>
     );
 }
-
