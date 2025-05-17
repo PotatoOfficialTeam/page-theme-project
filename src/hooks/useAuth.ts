@@ -1,6 +1,7 @@
 // src/hooks/useAuth.ts
 import { useState, useEffect } from 'react';
 import { login, LoginResponse } from '../api/auth';
+import { Storage, StorageKeys } from '../utils/storage';
 
 interface LoginResult {
   success: boolean;
@@ -12,8 +13,9 @@ export const useAuth = () => {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
+  // 初始化时检查本地存储中是否有有效令牌
   useEffect(() => {
-    const storedToken = localStorage.getItem('userToken');
+    const storedToken = Storage.get(StorageKeys.USER_TOKEN);
     if (storedToken) {
       setToken(storedToken);
       setIsAuthenticated(true);
@@ -26,7 +28,8 @@ export const useAuth = () => {
     try {
       const result: LoginResponse = await login(email, password);
       if (result.status === 'success' && result.data && result.data.auth_data) {
-        localStorage.setItem('userToken', result.data.auth_data);
+        // 使用 Storage 工具存储令牌，确保一致性
+        Storage.set(StorageKeys.USER_TOKEN, result.data.auth_data);
         setToken(result.data.auth_data);
         setIsAuthenticated(true);
         return { success: true };
@@ -40,7 +43,8 @@ export const useAuth = () => {
   };
 
   const logoutUser = () => {
-    localStorage.removeItem('userToken');
+    // 使用 Storage 工具移除令牌，确保一致性
+    Storage.remove(StorageKeys.USER_TOKEN);
     setToken(null);
     setIsAuthenticated(false);
   };

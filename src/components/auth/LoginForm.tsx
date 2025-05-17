@@ -1,6 +1,4 @@
 // src/components/auth/LoginForm.tsx
-// 从 src/components/LoginForm.tsx 迁移
-// 主要更新了导入路径和使用 API 服务
 import React, { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../../config/routes';
