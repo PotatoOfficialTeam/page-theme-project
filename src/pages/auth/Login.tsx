@@ -14,10 +14,12 @@ const Login: React.FC = () => {
   }
 
   // 登录成功回调函数
-  const handleUserAuthenticated = async (token: string) => {
-    // 将 token 保存到本地存储并更新认证状态
+  const handleUserAuthenticated = (token: string) => {
+    // 保存token到localStorage
     localStorage.setItem('userToken', token);
-    // 强制重新加载页面以确保路由系统能够识别到新的认证状态
+    
+    // 强制页面跳转以确保路由系统能够识别到新的认证状态
+    // 使用 window.location.href 而非 navigate，可以确保完全刷新应用状态
     window.location.href = ROUTES.DASHBOARD.HOME;
   };
 
