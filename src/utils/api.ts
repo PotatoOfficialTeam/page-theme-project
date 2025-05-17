@@ -76,7 +76,7 @@ export const apiGet = async <T = any>(
     if (withAuth) {
       const token = Storage.get(StorageKeys.USER_TOKEN);
       if (token) {
-        requestHeaders['Authorization'] = `Bearer ${token}`;
+        requestHeaders['Authorization'] = token;
       }
     }
     
@@ -155,7 +155,7 @@ export const apiPost = async <T = any>(
     if (withAuth) {
       const token = Storage.get(StorageKeys.USER_TOKEN);
       if (token) {
-        requestHeaders['Authorization'] = `Bearer ${token}`;
+        requestHeaders['Authorization'] = token;
       }
     }
     
