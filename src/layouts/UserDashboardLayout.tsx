@@ -1,9 +1,9 @@
 // src/layouts/UserDashboardLayout.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { ROUTES } from '../config/routes';
+import { ROUTES } from '../config/routes'; // 假设此文件在您的项目中已正确定义
 
-// --- 图标占位符 (与之前版本相同) ---
+// --- 图标占位符 ---
 const HomeIcon = () => <span>🏠</span>;
 const DocsIcon = () => <span>📄</span>;
 const StoreCategoryIcon = () => <span className="text-xs opacity-0">🛍️</span>;
@@ -22,7 +22,7 @@ const MenuIcon = () => <span>☰</span>;
 const UserProfileIcon = () => <span className="text-sm font-semibold">ME</span>;
 const LogoutIcon = () => <span>🚪</span>;
 
-// --- 导航项类型定义 (与之前版本相同) ---
+// --- 导航项类型定义 ---
 interface NavItem {
   id: string;
   label: string;
@@ -32,7 +32,8 @@ interface NavItem {
   subItems?: NavItem[];
 }
 
-// --- 使用新的 path 更新侧边栏导航数据 ---
+// --- 侧边栏导航数据 ---
+// 注意：确保ROUTES中的路径与这里的路径定义一致且ROUTES对象已正确导入
 const sidebarNavigation: NavItem[] = [
   { id: 'home', label: '首页', icon: <HomeIcon />, path: `${ROUTES.DASHBOARD.HOME}` },
   { id: 'docs', label: '使用文档', icon: <DocsIcon />, path: `${ROUTES.DASHBOARD.DOCS}` },
@@ -67,14 +68,13 @@ interface UserDashboardLayoutProps {
 
 const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ onLogout }) => {
   const [activePageId, setActivePageId] = useState<string>('home');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    // 根据当前路径设置激活的导航项
     const path = location.pathname;
     let foundActiveId = '';
 
@@ -92,12 +92,18 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ onLogout }) =
     };
 
     findActiveId(sidebarNavigation);
+
     if (foundActiveId) {
       setActivePageId(foundActiveId);
-    } else if (path.includes('/dashboard')) {
+    } else if (ROUTES.DASHBOARD.ROOT && path.startsWith(ROUTES.DASHBOARD.ROOT)) { 
+      // 如果当前路径在DASHBOARD的根路径下，但没有精确匹配到导航项，则默认激活'home'
+      // (例如 /dashboard/some-other-page 应该让 '首页' 高亮)
       setActivePageId('home');
     }
-  }, [location.pathname]);
+    // 如果 ROUTES.DASHBOARD.ROOT 未定义或不适用作通用前缀，
+    // 您可能需要一个更通用的检查，例如 path.startsWith('/dashboard')
+    // 但使用 ROUTES 中的常量更好。
+  }, [location.pathname, ROUTES]); // 添加 ROUTES 到依赖项数组，如果它可能变化
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -109,12 +115,24 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ onLogout }) =
     return () => { document.removeEventListener('mousedown', handleClickOutside); };
   }, []);
 
+  useEffect(() => {
+    const handleResize = () => {
+      // 此处逻辑可以根据具体需求调整，当前主要依赖CSS断点
+      // if (window.innerWidth >= 768) { // md breakpoint
+      // } else {
+      // }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+
   const handleNavClick = (item: NavItem) => {
     if (!item.isCategoryLabel && item.path) {
       setActivePageId(item.id);
       navigate(item.path);
-      if (window.innerWidth < 768 && !item.subItems) {
-         setIsSidebarOpen(false);
+      if (window.innerWidth < 768) { 
+        setIsSidebarOpen(false);
       }
     }
   };
@@ -142,7 +160,6 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ onLogout }) =
     ));
   };
   
-  // 查找当前活动页面的标签
   const findCurrentPageLabel = (): string => {
     const findLabel = (items: NavItem[]): string | null => {
       for (const item of items) {
@@ -154,7 +171,6 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ onLogout }) =
       }
       return null;
     };
-    
     return findLabel(sidebarNavigation) || '仪表盘';
   };
 
@@ -166,9 +182,31 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ onLogout }) =
 
   return (
     <div className="flex h-screen bg-gray-100 font-sans">
-      <aside className={` ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed inset-y-0 left-0 z-30 w-60 bg-white shadow-lg transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:shadow-none md:border-r md:border-gray-200 flex flex-col`}>
-        <div className="flex items-center justify-center h-16 border-b border-gray-200 px-4"><span className="text-xl font-bold text-blue-600 whitespace-nowrap overflow-hidden overflow-ellipsis">应用平台名称</span></div>
-        <nav className="pt-2 pb-4 flex-grow overflow-y-auto">{renderNavMenuItems(sidebarNavigation)}</nav>
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 z-20 bg-black bg-opacity-50 transition-opacity duration-300 ease-in-out md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+          aria-hidden="true"
+        ></div>
+      )}
+
+      <aside 
+        className={`
+          fixed inset-y-0 left-0 z-30 w-60 bg-white shadow-lg 
+          transform transition-transform duration-300 ease-in-out 
+          flex flex-col
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          md:relative md:translate-x-0 md:shadow-none md:border-r md:border-gray-200
+        `}
+      >
+        <div className="flex items-center justify-center h-16 border-b border-gray-200 px-4">
+          <span className="text-xl font-bold text-blue-600 whitespace-nowrap overflow-hidden overflow-ellipsis">
+            应用平台名称
+          </span>
+        </div>
+        <nav className="pt-2 pb-4 flex-grow overflow-y-auto">
+          {renderNavMenuItems(sidebarNavigation)}
+        </nav>
       </aside>
 
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -176,17 +214,42 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ onLogout }) =
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center">
-                <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="md:hidden text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700 mr-4" aria-label="Toggle sidebar"><MenuIcon /></button>
+                <button 
+                  onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+                  className="md:hidden text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700 mr-4" 
+                  aria-label="Toggle sidebar"
+                  aria-expanded={isSidebarOpen}
+                >
+                  <MenuIcon />
+                </button>
                 <h1 className="text-xl font-semibold text-gray-800">{findCurrentPageLabel()}</h1>
               </div>
               <div className="flex items-center space-x-3">
-                <button className="hidden sm:flex items-center text-sm text-blue-600 hover:text-blue-700 border border-blue-500 hover:border-blue-600 rounded-md px-3 py-1.5 transition-colors"><DownloadIcon /> <span className="ml-1.5">下载客户端</span></button>
-                <button className="hidden sm:flex items-center text-sm text-white bg-blue-500 hover:bg-blue-600 rounded-md px-3 py-1.5 transition-colors"><RenewIcon /> <span className="ml-1.5">续费订阅</span></button>
+                <button className="hidden sm:flex items-center text-sm text-blue-600 hover:text-blue-700 border border-blue-500 hover:border-blue-600 rounded-md px-3 py-1.5 transition-colors">
+                  <DownloadIcon /> <span className="ml-1.5">下载客户端</span>
+                </button>
+                <button className="hidden sm:flex items-center text-sm text-white bg-blue-500 hover:bg-blue-600 rounded-md px-3 py-1.5 transition-colors">
+                  <RenewIcon /> <span className="ml-1.5">续费订阅</span>
+                </button>
                 <div className="relative" ref={userMenuRef}>
-                  <button onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} className="flex items-center justify-center h-9 w-9 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 focus:outline-none ring-2 ring-transparent focus:ring-blue-500 transition-all" aria-label="用户菜单"><UserProfileIcon /></button>
+                  <button 
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} 
+                    className="flex items-center justify-center h-9 w-9 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 focus:outline-none ring-2 ring-transparent focus:ring-blue-500 transition-all" 
+                    aria-label="用户菜单"
+                    aria-haspopup="true"
+                    aria-expanded={isUserMenuOpen}
+                  >
+                    <UserProfileIcon />
+                  </button>
                   {isUserMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl z-20 py-1">
-                      <button onClick={handleLogoutClick} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center"><LogoutIcon /> <span className="ml-2">登出</span></button>
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl z-20 py-1" role="menu">
+                      <button 
+                        onClick={handleLogoutClick} 
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center"
+                        role="menuitem"
+                      >
+                        <LogoutIcon /> <span className="ml-2">登出</span>
+                      </button>
                     </div>
                   )}
                 </div>
@@ -194,8 +257,8 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ onLogout }) =
             </div>
           </div>
         </header>
-        {/* 使用 Outlet 渲染子路由组件 */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
+        
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-4 sm:p-6">
           <Outlet />
         </main>
       </div>

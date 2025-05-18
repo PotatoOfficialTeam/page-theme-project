@@ -2,7 +2,12 @@
 import React from 'react';
 import { useUserInfo } from '@/hooks/useUserInfo';
 import { useSubscription } from '@/hooks/useSubscription';
-import NoticeBoardModal from './home/NoticeBoardModal';
+// 注意：请确保此路径正确指向您修改后的 NoticeBoardModal 组件
+// 如果 NoticeBoardModal.tsx 位于 src/components/dashboard/NoticeBoardModal.tsx
+// 并且您使用了路径别名 '@' 指向 src 目录，则应改为：
+// import NoticeBoardModal from '@/components/dashboard/NoticeBoardModal';
+// 否则，请使用正确的相对路径。
+import NoticeBoardModal from './home/NoticeBoardModal'; // 原始路径，请检查是否需要修改
 
 // 图标组件 (只保留用到的)
 const WalletIcon = () => <span>💼</span>;
@@ -16,7 +21,6 @@ const Home: React.FC = () => {
     subscription, 
     loading: subLoading, 
     error: subError,
-    // usedTraffic, // 暂时不直接显示，除非需要
     remainingTraffic,
     totalTraffic,
     usedTrafficPercentage,
@@ -86,7 +90,7 @@ const Home: React.FC = () => {
         <div className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow">
           <div className="flex items-center text-gray-500 mb-2">
             <TrafficIcon />
-            <span className="ml-2 text-sm">总流量 / 剩余</span> {/* 简化标题 */}
+            <span className="ml-2 text-sm">总流量 / 剩余</span>
           </div>
           <p className="text-2xl font-semibold text-gray-800">
             {totalTraffic ?? 'N/A'} / <span className="text-green-500">{remainingTraffic ?? 'N/A'}</span>
@@ -155,12 +159,6 @@ const Home: React.FC = () => {
           )}
         </div>
       </div>
-
-      {/* 移除了以下静态内容块:
-        - 原先的嵌入式 NoticeBoard
-        - "寻找人工客服"
-        - "快捷操作"
-      */}
     </div>
   );
 };

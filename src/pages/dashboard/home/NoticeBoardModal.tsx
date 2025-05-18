@@ -14,24 +14,33 @@ interface NoticeBoardModalProps {
 }
 
 const NOTICE_MODAL_LAST_SEEN_ID_KEY = 'dashboardNoticeModalLastSeenId';
+const NOTICE_MODAL_LAST_CLOSED_TIMESTAMP_KEY = 'dashboardNoticeModalLastClosedTimestamp';
 
 const NoticeBoardModal: React.FC<NoticeBoardModalProps> = ({
   initiallyOpenOnNewNotice = true,
 }) => {
-  const { notices, loading, error } = useNotices(); // 移除了 total 和 refreshNotices，如果弹窗内不需要刷新
+  const { notices, loading, error } = useNotices();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [currentNotice, setCurrentNotice] = useState<Notice | null>(null);
 
   useEffect(() => {
     if (initiallyOpenOnNewNotice && notices && notices.length > 0) {
-      // 假设 notices 数组按创建时间降序排列 (最新的在最前面)
       const latestNotice = notices[0];
       if (!latestNotice || !latestNotice.id) return;
 
       const lastSeenIdStr = localStorage.getItem(NOTICE_MODAL_LAST_SEEN_ID_KEY);
       const lastSeenId = lastSeenIdStr ? parseInt(lastSeenIdStr, 10) : 0;
 
-      if (latestNotice.id > lastSeenId) {
+      const lastClosedTimestampStr = localStorage.getItem(NOTICE_MODAL_LAST_CLOSED_TIMESTAMP_KEY);
+      const lastClosedTimestamp = lastClosedTimestampStr ? parseInt(lastClosedTimestampStr, 10) : 0;
+
+      const now = Date.now();
+      const thirtyMinutesInMs = 30 * 60 * 1000;
+
+      const isNewerNotice = latestNotice.id > lastSeenId;
+      const isCooldownOver = (now - lastClosedTimestamp) > thirtyMinutesInMs;
+
+      if (isNewerNotice || isCooldownOver) {
         setCurrentNotice(latestNotice);
         setIsModalOpen(true);
       }
@@ -43,6 +52,7 @@ const NoticeBoardModal: React.FC<NoticeBoardModalProps> = ({
     if (currentNotice && currentNotice.id) {
       localStorage.setItem(NOTICE_MODAL_LAST_SEEN_ID_KEY, currentNotice.id.toString());
     }
+    localStorage.setItem(NOTICE_MODAL_LAST_CLOSED_TIMESTAMP_KEY, Date.now().toString());
   }, [currentNotice]);
 
   const formatDate = (timestamp: number): string => {
@@ -75,13 +85,14 @@ const NoticeBoardModal: React.FC<NoticeBoardModalProps> = ({
   };
 
   if (!isModalOpen || !currentNotice) {
-    return null; // 如果不显示弹窗，则不渲染任何内容
+    return null;
   }
 
-  if (loading && !currentNotice) { // 初始加载时，如果弹窗逻辑触发但数据未完全就绪
+  // 加载状态和错误状态的弹窗保持较小尺寸，不应用复杂的宽度调整
+  if (loading && !currentNotice) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md text-center">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1001] p-4"> {/* Increased z-index slightly if needed over other modals */}
+        <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-xs text-center">
           <div className="animate-spin h-6 w-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto"></div>
           <p className="mt-3 text-sm text-gray-500">加载公告...</p>
         </div>
@@ -89,13 +100,13 @@ const NoticeBoardModal: React.FC<NoticeBoardModalProps> = ({
     );
   }
   
-  if (error && !currentNotice) { // 加载公告出错
+  if (error && !currentNotice) {
      return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md text-center">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1001] p-4">
+        <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-xs text-center">
           <p className="text-red-600">无法加载公告: {error}</p>
           <button
-            onClick={() => setIsModalOpen(false)} // 提供关闭选项
+            onClick={() => setIsModalOpen(false)}
             className="mt-4 px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
           >
             关闭
@@ -106,8 +117,15 @@ const NoticeBoardModal: React.FC<NoticeBoardModalProps> = ({
   }
 
   return (
+    // Backdrop: p-4 提供边缘空间，使得弹窗不会紧贴屏幕边缘
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[1000] p-4 transition-opacity duration-300 ease-in-out" role="dialog" aria-modal="true" aria-labelledby="noticeModalTitle">
-      <div className="bg-white rounded-lg shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col transform transition-all duration-300 ease-in-out scale-100">
+      {/* Modal Dialog Container: 调整了最大宽度 */}
+      <div 
+        className="bg-white rounded-lg shadow-2xl w-full 
+                   max-w-sm sm:max-w-md md:max-w-lg /* 在小屏幕上最大宽度为sm (384px), 中等屏幕sm (448px), md及以上为lg (512px) */
+                   max-h-[85vh] flex flex-col 
+                   transform transition-all duration-300 ease-in-out scale-100"
+      >
         {/* Modal Header */}
         <div className="flex justify-between items-center p-4 border-b border-gray-200">
           <h3 id="noticeModalTitle" className="text-xl font-semibold text-gray-800 flex items-center">
@@ -123,17 +141,16 @@ const NoticeBoardModal: React.FC<NoticeBoardModalProps> = ({
           </button>
         </div>
 
-        {/* Modal Body - Scrollable */}
-        <div className="p-5 overflow-y-auto">
+        {/* Modal Body - Scrollable: 添加了 flex-1 */}
+        <div className="p-5 overflow-y-auto flex-1"> {/* flex-1 使此div填充可用空间，确保滚动正常 */}
           <div className="mb-3">
              <span className="text-xs text-gray-500">
                 发布于: {currentNotice.created_at ? formatDate(currentNotice.created_at) : '未知日期'}
              </span>
              {renderTags(currentNotice.tags)}
           </div>
-          {/* 使用你原来的 NoticeBoard.css 来渲染HTML内容 */}
           <div
-            className="notice-content text-sm text-gray-700" // prose prose-sm max-w-none (如果使用Tailwind Typography)
+            className="notice-content text-sm text-gray-700"
             dangerouslySetInnerHTML={{ __html: currentNotice.content || '暂无内容。' }}
           />
         </div>
