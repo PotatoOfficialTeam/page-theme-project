@@ -33,6 +33,7 @@ interface NavItem {
 }
 
 // --- 侧边栏导航数据 ---
+// 注意：确保ROUTES中的路径与这里的路径定义一致且ROUTES对象已正确导入
 const sidebarNavigation: NavItem[] = [
   { id: 'home', label: '首页', icon: <HomeIcon />, path: `${ROUTES.DASHBOARD.HOME}` },
   { id: 'docs', label: '使用文档', icon: <DocsIcon />, path: `${ROUTES.DASHBOARD.DOCS}` },
@@ -67,7 +68,7 @@ interface UserDashboardLayoutProps {
 
 const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ onLogout }) => {
   const [activePageId, setActivePageId] = useState<string>('home');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -76,6 +77,7 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ onLogout }) =
   useEffect(() => {
     const path = location.pathname;
     let foundActiveId = '';
+
     const findActiveId = (items: NavItem[]): boolean => {
       for (const item of items) {
         if (item.path && path === item.path) {
@@ -88,13 +90,20 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ onLogout }) =
       }
       return false;
     };
+
     findActiveId(sidebarNavigation);
+
     if (foundActiveId) {
       setActivePageId(foundActiveId);
-    } else if (ROUTES.DASHBOARD.ROOT && path.startsWith(ROUTES.DASHBOARD.ROOT)) {
+    } else if (ROUTES.DASHBOARD.ROOT && path.startsWith(ROUTES.DASHBOARD.ROOT)) { 
+      // 如果当前路径在DASHBOARD的根路径下，但没有精确匹配到导航项，则默认激活'home'
+      // (例如 /dashboard/some-other-page 应该让 '首页' 高亮)
       setActivePageId('home');
     }
-  }, [location.pathname, ROUTES]);
+    // 如果 ROUTES.DASHBOARD.ROOT 未定义或不适用作通用前缀，
+    // 您可能需要一个更通用的检查，例如 path.startsWith('/dashboard')
+    // 但使用 ROUTES 中的常量更好。
+  }, [location.pathname, ROUTES]); // 添加 ROUTES 到依赖项数组，如果它可能变化
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -108,7 +117,10 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ onLogout }) =
 
   useEffect(() => {
     const handleResize = () => {
-      // Resize logic can be added here if needed for more complex sidebar interactions
+      // 此处逻辑可以根据具体需求调整，当前主要依赖CSS断点
+      // if (window.innerWidth >= 768) { // md breakpoint
+      // } else {
+      // }
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -119,7 +131,7 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ onLogout }) =
     if (!item.isCategoryLabel && item.path) {
       setActivePageId(item.id);
       navigate(item.path);
-      if (window.innerWidth < 768) {
+      if (window.innerWidth < 768) { 
         setIsSidebarOpen(false);
       }
     }
@@ -147,7 +159,7 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ onLogout }) =
       </React.Fragment>
     ));
   };
-
+  
   const findCurrentPageLabel = (): string => {
     const findLabel = (items: NavItem[]): string | null => {
       for (const item of items) {
@@ -178,10 +190,10 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ onLogout }) =
         ></div>
       )}
 
-      <aside
+      <aside 
         className={`
-          fixed inset-y-0 left-0 z-30 w-60 bg-white shadow-lg
-          transform transition-transform duration-300 ease-in-out
+          fixed inset-y-0 left-0 z-30 w-60 bg-white shadow-lg 
+          transform transition-transform duration-300 ease-in-out 
           flex flex-col
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           md:relative md:translate-x-0 md:shadow-none md:border-r md:border-gray-200
@@ -199,12 +211,12 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ onLogout }) =
 
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="bg-white shadow-sm border-b border-gray-200">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8"> {/* Header内通常有container来约束宽度 */}
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center">
-                <button
-                  onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                  className="md:hidden text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700 mr-4"
+                <button 
+                  onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+                  className="md:hidden text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700 mr-4" 
                   aria-label="Toggle sidebar"
                   aria-expanded={isSidebarOpen}
                 >
@@ -220,9 +232,9 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ onLogout }) =
                   <RenewIcon /> <span className="ml-1.5">续费订阅</span>
                 </button>
                 <div className="relative" ref={userMenuRef}>
-                  <button
-                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center justify-center h-9 w-9 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 focus:outline-none ring-2 ring-transparent focus:ring-blue-500 transition-all"
+                  <button 
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} 
+                    className="flex items-center justify-center h-9 w-9 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 focus:outline-none ring-2 ring-transparent focus:ring-blue-500 transition-all" 
                     aria-label="用户菜单"
                     aria-haspopup="true"
                     aria-expanded={isUserMenuOpen}
@@ -231,8 +243,8 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ onLogout }) =
                   </button>
                   {isUserMenuOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl z-20 py-1" role="menu">
-                      <button
-                        onClick={handleLogoutClick}
+                      <button 
+                        onClick={handleLogoutClick} 
                         className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center"
                         role="menuitem"
                       >
@@ -245,10 +257,11 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ onLogout }) =
             </div>
           </div>
         </header>
-
-        {/* 子路由渲染区域：移除了 p-4 sm:p-6 内边距 */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
-          <Outlet />
+        
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 py-6 sm:py-8"> {/* 1. 为整个内容区域添加垂直内边距 */}
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl"> {/* 2. 最大宽度容器，水平居中，并有自己的水平内边距 */}
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

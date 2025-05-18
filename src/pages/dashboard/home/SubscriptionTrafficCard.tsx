@@ -140,7 +140,7 @@ const SubscriptionTrafficCard: React.FC<SubscriptionTrafficCardProps> = ({
 
 
   return (
-    <div className="bg-white p-6 shadow hover:shadow-lg transition-shadow">
+    <div className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow">
       {/* --- 我的订阅部分 --- */}
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-gray-700">我的订阅</h3>
