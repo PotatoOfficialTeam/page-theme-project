@@ -1,0 +1,116 @@
+/* src/components/dashboard/NoticeBoard.css */
+
+/* 公告内容样式 */
+.notice-content {
+  line-height: 1.6;
+  font-size: 0.875rem; /* text-sm */
+  color: #4b5563; /* text-gray-600 */
+  overflow-wrap: break-word;
+}
+
+/* 图片样式 */
+.notice-content img {
+  max-width: 100%;
+  height: auto;
+  margin: 0.5rem 0;
+  border-radius: 0.25rem;
+}
+
+/* 链接样式 */
+.notice-content a {
+  color: #3b82f6; /* 蓝色 */
+  text-decoration: underline;
+}
+
+.notice-content a:hover {
+  color: #2563eb; /* 深蓝色 */
+}
+
+/* 标题样式 */
+.notice-content h1, 
+.notice-content h2, 
+.notice-content h3 {
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.notice-content h1 {
+  font-size: 1.25rem;
+}
+
+.notice-content h2 {
+  font-size: 1.125rem;
+}
+
+.notice-content h3 {
+  font-size: 1rem;
+}
+
+/* 段落样式 */
+.notice-content p {
+  margin-bottom: 0.75em;
+}
+
+/* 列表样式 */
+.notice-content ul, 
+.notice-content ol {
+  padding-left: 1.5em;
+  margin-bottom: 0.75em;
+}
+
+.notice-content li {
+  margin-bottom: 0.25em;
+}
+
+/* 表格样式 */
+.notice-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+
+.notice-content th,
+.notice-content td {
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.notice-content th {
+  background-color: #f9fafb;
+  font-weight: 600;
+}
+
+/* 代码样式 */
+.notice-content pre,
+.notice-content code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.875em;
+  background-color: #f3f4f6;
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+}
+
+.notice-content pre {
+  padding: 1em;
+  overflow-x: auto;
+  line-height: 1.5;
+}
+
+/* 引用样式 */
+.notice-content blockquote {
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1em;
+  color: #6b7280;
+  font-style: italic;
+  margin: 1em 0;
+}
+
+/* 水平线样式 */
+.notice-content hr {
+  border: 0;
+  border-top: 1px solid #e5e7eb;
+  margin: 1.5em 0;
+}

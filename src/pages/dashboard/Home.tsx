@@ -2,6 +2,7 @@
 import React from 'react';
 import { useUserInfo } from '@/hooks/useUserInfo';
 import { useSubscription } from '@/hooks/useSubscription';
+import NoticeBoard from './home/NoticeBoard';
 
 // 图标组件
 const WalletIcon = () => <span>💼</span>;
@@ -111,46 +112,14 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      {/* 我的订阅 和 寻找人工客服 */}
+      {/* 公告栏和我的订阅区域 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-700">我的订阅</h3>
-            <button 
-              onClick={refreshSubscription}
-              className="text-sm text-blue-500 hover:text-blue-600 flex items-center"
-            >
-              <RefreshIcon /> <span className="ml-1">刷新订阅</span>
-            </button>
-          </div>
-          <div className="border-t pt-4">
-            {subscription ? (
-              <>
-                <p className="font-medium text-gray-800">{subscription.plan.name}</p>
-                <p className="text-sm text-green-600">{getSubscriptionStatus()}</p>
-                <p className="text-xs text-gray-500 mt-2">
-                  重置日期: 每月 {subscription.reset_day} 日 | 
-                  订阅价格: {(subscription.plan.month_price / 100).toFixed(2)} 元/月
-                </p>
-                {subscription.subscribe_url && (
-                  <div className="mt-3">
-                    <a 
-                      href={subscription.subscribe_url} 
-                      className="text-sm text-blue-500 hover:underline"
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                    >
-                      查看订阅链接
-                    </a>
-                  </div>
-                )}
-              </>
-            ) : (
-              <p className="text-gray-600">暂无订阅信息</p>
-            )}
-          </div>
+        {/* 公告栏组件 */}
+        <div className="lg:col-span-2">
+          <NoticeBoard maxNotices={3} />
         </div>
         
+        {/* 寻找人工客服 */}
         <div className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow">
           <h3 className="text-lg font-semibold text-gray-700 mb-3">寻找人工客服</h3>
           <div className="text-xs text-gray-600 space-y-1">
@@ -161,6 +130,45 @@ const Home: React.FC = () => {
             <p>官网右下角在线客服 09:00-22:00</p>
             <p>官网左侧我的工单48小时内处理... <a href="mailto:themojie@pm.me" className="text-blue-500 hover:underline">邮箱客服</a></p>
           </div>
+        </div>
+      </div>
+
+      {/* 我的订阅 */}
+      <div className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold text-gray-700">我的订阅</h3>
+          <button 
+            onClick={refreshSubscription}
+            className="text-sm text-blue-500 hover:text-blue-600 flex items-center"
+          >
+            <RefreshIcon /> <span className="ml-1">刷新订阅</span>
+          </button>
+        </div>
+        <div className="border-t pt-4">
+          {subscription ? (
+            <>
+              <p className="font-medium text-gray-800">{subscription.plan.name}</p>
+              <p className="text-sm text-green-600">{getSubscriptionStatus()}</p>
+              <p className="text-xs text-gray-500 mt-2">
+                重置日期: 每月 {subscription.reset_day} 日 | 
+                订阅价格: {(subscription.plan.month_price / 100).toFixed(2)} 元/月
+              </p>
+              {subscription.subscribe_url && (
+                <div className="mt-3">
+                  <a 
+                    href={subscription.subscribe_url} 
+                    className="text-sm text-blue-500 hover:underline"
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    查看订阅链接
+                  </a>
+                </div>
+              )}
+            </>
+          ) : (
+            <p className="text-gray-600">暂无订阅信息</p>
+          )}
         </div>
       </div>
 
